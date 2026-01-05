@@ -1,7 +1,7 @@
 
 async function checkStatus() {
     try {
-        const response = await fetch('/check-auth');
+        const response = await fetch('/check-auth');//send a request to operate check-auth
         const data = await response.json();
 
         const loginBtn = document.getElementById('loginButton');
