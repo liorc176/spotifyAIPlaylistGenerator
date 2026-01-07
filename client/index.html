@@ -5,11 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
 </head>
-<body style="text-align: center;">
-    <h1 style="font-size: 70px;">welcome</h1>
-    <p style="font-size: 40px;">Generate your playlist with AI</p>
-    <button id="loginButton" style="font-size: 20px;">login with Spotify</button>
-    <div id="status"></div>
+<body style="background-color: #121212; color: white; font-family: 'Circular', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center;">
+
+    <h1 style="font-size: 70px; font-weight: 900; margin-bottom: 10px; letter-spacing: -2px;">welcome</h1>
+    
+    <p style="font-size: 24px; color: #b3b3b3; margin-bottom: 40px; font-weight: 500;">Generate your playlist with AI</p>
+    
+    <button id="loginButton" style="
+        background-color: #1DB954; 
+        color: white; 
+        font-size: 16px; 
+        font-weight: 700; 
+        padding: 14px 48px; 
+        border: none; 
+        border-radius: 500px; 
+        cursor: pointer; 
+        transition: transform 0.2s, background-color 0.2s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    " onmouseover="this.style.backgroundColor='#1ed760'; this.style.transform='scale(1.05)';" 
+      onmouseout="this.style.backgroundColor='#1DB954'; this.style.transform='scale(1)';"
+      onmousedown="this.style.transform='scale(0.95)';">
+        login with Spotify
+    </button>
+
+    <div id="status" style="margin-top: 20px; color: #ff4136; font-size: 14px;"></div>
+
     <script src="app.js"></script>
 </body>
 </html>

@@ -55,19 +55,40 @@ function renderSongs(songs) {
     const ul = document.createElement('ul');//list of songs
     songs.forEach(song => {
         const li = document.createElement('li');
-        li.innerHTML = `<strong>${song.artist}</strong> - ${song.track}`;
+        li.innerHTML = `<strong>${song.track}</strong> - ${song.artist}`;
         ul.appendChild(li);
     });
     resultsDiv.appendChild(ul);
-    const saveBtn = document.createElement('button');
-    saveBtn.innerText = 'save playlist💾';
-    saveBtn.style.marginTop = '20px';
-    saveBtn.style.backgroundColor = '#1DB954';
-    saveBtn.style.color = 'white';
-    saveBtn.style.border = 'none';
-    saveBtn.style.padding = '10px 20px';
-    saveBtn.style.cursor = 'pointer';
-    saveBtn.style.borderRadius = '20px';
+const saveBtn = document.createElement('button');
+saveBtn.innerText = 'SAVE TO SPOTIFY 💾';
+
+    Object.assign(saveBtn.style, {
+        marginTop: '30px',
+        backgroundColor: '#1DB954',
+        color: 'white',
+        fontSize: '14px',
+        fontWeight: '700',
+        padding: '14px 32px',
+        border: 'none',
+        borderRadius: '500px',
+        cursor: 'pointer',
+        textTransform: 'uppercase',
+        letterSpacing: '1px',
+        transition: 'transform 0.2s, background-color 0.2s'
+    });
+    saveBtn.onmouseover = () => {
+        saveBtn.style.backgroundColor = '#1ed760';
+        saveBtn.style.transform = 'scale(1.04)';
+    };
+
+    saveBtn.onmouseout = () => {
+        saveBtn.style.backgroundColor = '#1DB954';
+        saveBtn.style.transform = 'scale(1)';
+    };
+    saveBtn.onmousedown = () => {
+        saveBtn.style.transform = 'scale(0.96)';
+    };
+
     saveBtn.onclick = saveToSpotify; 
     resultsDiv.appendChild(saveBtn);
 

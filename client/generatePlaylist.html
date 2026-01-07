@@ -17,17 +17,57 @@
         li { padding: 5px 0; border-bottom: 1px solid #eee; }
     </style>
 </head>
-<body>
-    <h1>🎶how are you feeling today? </h1>
-    <input type="text" id="moodInput" placeholder="example: happy, sad, morning workout">
-    
-    <button id="generateBtn" onclick="generatePlaylist()">generate playlist</button>
-    
-    <div id="timerDisplay"></div>
-    
-    <div id="loader" style="display:none;">🤖loading... 
+<body style="background-color: #121212; color: white; font-family: 'Circular', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh;">
+
+    <h1 style="font-size: 48px; font-weight: 900; letter-spacing: -1px; margin-bottom: 30px; text-align: center;">
+        🎶 how are you feeling today?
+    </h1>
+
+    <div style="width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 20px;">
+        <input type="text" id="moodInput" placeholder="example: happy, sad, morning workout" style="
+            background-color: #242424;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            color: white;
+            padding: 14px 20px;
+            font-size: 16px;
+            outline: none;
+            transition: border 0.3s;
+        " onfocus="this.style.border='1px solid #777'" onblur="this.style.border='1px solid transparent'">
+
+        <button id="generateBtn" onclick="generatePlaylist()" style="
+            background-color: #1DB954;
+            color: white;
+            font-size: 16px;
+            font-weight: 700;
+            padding: 14px;
+            border: none;
+            border-radius: 500px;
+            cursor: pointer;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: transform 0.2s, background-color 0.2s;
+        " onmouseover="this.style.backgroundColor='#1ed760'; this.style.transform='scale(1.02)';" 
+          onmouseout="this.style.backgroundColor='#1DB954'; this.style.transform='scale(1)';"
+          onmousedown="this.style.transform='scale(0.98)';">
+            generate playlist
+        </button>
     </div>
-    <div id="results"></div>
+
+    <div id="timerDisplay" style="margin-top: 20px; color: #b3b3b3; font-weight: 500;"></div>
+
+    <div id="loader" style="display:none; margin-top: 30px; font-size: 18px; color: #1DB954; font-weight: bold;">
+        🤖 loading...
+    </div>
+
+    <div id="results" style="
+        margin-top: 40px; 
+        width: 100%; 
+        max-width: 600px;
+        background-color: #181818;
+        border-radius: 8px;
+        padding: 20px;
+    "></div>
 
     <script src="generate.js"></script>
 </body>
