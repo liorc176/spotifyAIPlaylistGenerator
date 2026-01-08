@@ -1,5 +1,76 @@
 let countdownInterval; // save timer
 let songsArr=[]
+function updateDualSlider() {
+    const rangeStart = document.getElementById('rangeStart');
+    const rangeEnd = document.getElementById('rangeEnd');
+    const startDisplay = document.getElementById('startYearDisplay');
+    const endDisplay = document.getElementById('endYearDisplay');
+    const sliderFill = document.getElementById('sliderFill');
+
+    let startVal = parseInt(rangeStart.value);
+    let endVal = parseInt(rangeEnd.value);
+    const minGap = 10; 
+
+    // מניעת חפיפה בין הידיות
+    if (endVal - startVal <= minGap) {
+        // בודקים איזה סליידר הזיז המשתמש
+        if (event.target.id === 'rangeStart') {
+            rangeStart.value = endVal - minGap;
+            startVal = endVal - minGap;
+        } else {
+            rangeEnd.value = startVal + minGap;
+            endVal = startVal + minGap;
+        }
+    }
+
+    // עדכון הטקסט המוצג
+    startDisplay.innerText = startVal;
+    endDisplay.innerText = endVal;
+
+    // עדכון הפס הירוק (fill) בין הידיות
+    const min = parseInt(rangeStart.min);
+    const max = parseInt(rangeStart.max);
+    
+    const startPercent = ((startVal - min) / (max - min)) * 100;
+    const endPercent = ((endVal - min) / (max - min)) * 100;
+
+    sliderFill.style.left = startPercent + "%";
+    sliderFill.style.width = (endPercent - startPercent) + "%";
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    if(document.getElementById('rangeStart')) {
+        updateDualSlider();
+    }
+});
+
+function openModal() {
+    document.getElementById('filterModal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('filterModal').style.display = 'none';
+    const hasFilters = (document.getElementById('genreInput').value) || 
+                       (document.getElementById('artistInput').value) || 
+                       (document.getElementById('songCountInput').value!=20);
+    
+    const filterBtn = document.getElementById('filterBtn');
+    if(hasFilters) {
+        filterBtn.innerText = "Filter Active ✅";
+        filterBtn.style.border = "1px solid #1DB954";
+    } else {
+        filterBtn.innerText = "➕ Add Filter";
+        filterBtn.style.border = "none";
+    }
+}
+
+
+window.onclick = function(event) {
+    const modal = document.getElementById('filterModal');
+    if (event.target == modal) {
+        closeModal();
+    }
+}
 async function generatePlaylist() {
     const moodInput = document.getElementById('moodInput');
     const mood = moodInput.value;
@@ -7,7 +78,11 @@ async function generatePlaylist() {
     const resultsDiv = document.getElementById('results');
     const loader = document.getElementById('loader');
     const timerDisplay = document.getElementById('timerDisplay');
-
+    const genre = document.getElementById('genreInput').value;
+    const artist = document.getElementById('artistInput').value;
+    const songCount = document.getElementById('songCountInput').value;
+    const startYear = document.getElementById('rangeStart').value;
+    const endYear = document.getElementById('rangeEnd').value;
     if (!mood) return alert('please enter mood');
 
     loader.style.display = 'block';
@@ -19,7 +94,14 @@ async function generatePlaylist() {
         const response = await fetch('/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ mood: mood })
+            body: JSON.stringify({ 
+                mood: mood,
+                genre: genre,
+                artist: artist,
+                startYear: startYear, 
+                endYear: endYear,
+                songCount: songCount
+            })
         });
         
         const data = await response.json();
@@ -49,56 +131,46 @@ async function generatePlaylist() {
 }
 
 function renderSongs(songs) {
+    const mood = document.getElementById('moodInput').value;
     const resultsDiv = document.getElementById('results');
+    
     if (!songs || songs.length === 0) return;
 
-    const ul = document.createElement('ul');//list of songs
+    const ul = document.createElement('ul');
     songs.forEach(song => {
         const li = document.createElement('li');
         li.innerHTML = `<strong>${song.track}</strong> - ${song.artist}`;
         ul.appendChild(li);
     });
     resultsDiv.appendChild(ul);
-const saveBtn = document.createElement('button');
-saveBtn.innerText = 'SAVE TO SPOTIFY 💾';
 
-    Object.assign(saveBtn.style, {
-        marginTop: '30px',
-        backgroundColor: '#1DB954',
-        color: 'white',
-        fontSize: '14px',
-        fontWeight: '700',
-        padding: '14px 32px',
-        border: 'none',
-        borderRadius: '500px',
-        cursor: 'pointer',
-        textTransform: 'uppercase',
-        letterSpacing: '1px',
-        transition: 'transform 0.2s, background-color 0.2s'
-    });
-    saveBtn.onmouseover = () => {
-        saveBtn.style.backgroundColor = '#1ed760';
-        saveBtn.style.transform = 'scale(1.04)';
-    };
+    const nameLabel = document.createElement('label');
+    nameLabel.innerText = "Playlist Name:";
+    nameLabel.className = 'playlist-name-label'; // שימוש ב-class
+    resultsDiv.appendChild(nameLabel);
 
-    saveBtn.onmouseout = () => {
-        saveBtn.style.backgroundColor = '#1DB954';
-        saveBtn.style.transform = 'scale(1)';
-    };
-    saveBtn.onmousedown = () => {
-        saveBtn.style.transform = 'scale(0.96)';
-    };
+    const nameInput = document.createElement('input');
+    nameInput.type = "text";
+    nameInput.id = "playlistNameInput";
+    nameInput.value = `AI Mood: ${mood}`;
+    nameInput.className = 'playlist-name-input'; // שימוש ב-class
+    resultsDiv.appendChild(nameInput);
 
+    const saveBtn = document.createElement('button');
+    saveBtn.innerText = 'SAVE TO SPOTIFY 💾';
+    saveBtn.className = 'save-spotify-btn'; // שימוש ב-class שמטפל גם ב-hover
     saveBtn.onclick = saveToSpotify; 
+    
     resultsDiv.appendChild(saveBtn);
-
 }
 
 async function saveToSpotify() {
- 
     const mood = document.getElementById('moodInput').value;
-    const saveBtn = document.querySelector('#results button'); //find saveBtn
-
+    const saveBtn = document.querySelector('#results button'); 
+    const playlistNameInput = document.getElementById('playlistNameInput');
+    
+    const playlistName = playlistNameInput ? playlistNameInput.value : `AI Mood: ${mood}`;
+    
     if (!songsArr) return alert('cannot find those songs');
 
     saveBtn.disabled = true;
@@ -108,7 +180,7 @@ async function saveToSpotify() {
         const response = await fetch('/save-playlist', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ songs: songsArr, mood: mood })
+            body: JSON.stringify({ songs: songsArr, mood: mood, playlistName: playlistName })
         });
 
         const data = await response.json();
@@ -119,7 +191,9 @@ async function saveToSpotify() {
             const resultsDiv = document.getElementById('results');
             const link = document.createElement('p');
             link.style.marginTop = '15px';
-            link.innerHTML = `🎉 your playlist is ready! <a href="${data.playlistUrl}" target="_blank" style="color: #1DB954; font-weight:bold; text-decoration: none;">לחץ כאן לפתיחה בספוטיפיי</a>`;
+            
+   
+            link.innerHTML = `🎉 your playlist is ready! <a href="${data.playlistUrl}" target="_blank" class="success-link">click here to open in Spotify</a>`;
             resultsDiv.appendChild(link);
         } else {
             alert('error: ' + (data.error || 'could not save your playlist'));

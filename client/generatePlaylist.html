@@ -1,73 +1,75 @@
 <!DOCTYPE html>
-<html lang="he" dir="rtl">
+<html lang="he" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>generate playlist</title>
-    <style>
-        body { font-family: sans-serif; text-align: center; padding-top: 50px; }
-        input { padding: 10px; font-size: 16px; width: 300px; }
-        /* הוספתי עיצוב למצב disabled לכפתור */
-        button { padding: 10px 20px; font-size: 16px; background-color: #1DB954; color: white; border: none; cursor: pointer; }
-        button:disabled { background-color: #ccc; cursor: not-allowed; }
-        
-        #results { margin-top: 20px; text-align: left; display: inline-block; direction: ltr; } /* שירים באנגלית משמאל לימין */
-        #timerDisplay { margin-top: 15px; font-weight: bold; color: #d32f2f; font-size: 18px; }
-        ul { list-style-type: none; padding: 0; }
-        li { padding: 5px 0; border-bottom: 1px solid #eee; }
-    </style>
+    <link rel="stylesheet" href="generateDesign.css">
 </head>
-<body style="background-color: #121212; color: white; font-family: 'Circular', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh;">
+<body>
 
-    <h1 style="font-size: 48px; font-weight: 900; letter-spacing: -1px; margin-bottom: 30px; text-align: center;">
-        🎶 how are you feeling today?
+    <h1 class="main-title">
+         how are you feeling today?🎶
     </h1>
 
-    <div style="width: 100%; max-width: 500px; display: flex; flex-direction: column; gap: 20px;">
-        <input type="text" id="moodInput" placeholder="example: happy, sad, morning workout" style="
-            background-color: #242424;
-            border: 1px solid transparent;
-            border-radius: 4px;
-            color: white;
-            padding: 14px 20px;
-            font-size: 16px;
-            outline: none;
-            transition: border 0.3s;
-        " onfocus="this.style.border='1px solid #777'" onblur="this.style.border='1px solid transparent'">
+    <div class="input-container">
+        <input type="text" id="moodInput" class="mood-input" placeholder="example: happy, sad, morning workout">
 
-        <button id="generateBtn" onclick="generatePlaylist()" style="
-            background-color: #1DB954;
-            color: white;
-            font-size: 16px;
-            font-weight: 700;
-            padding: 14px;
-            border: none;
-            border-radius: 500px;
-            cursor: pointer;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            transition: transform 0.2s, background-color 0.2s;
-        " onmouseover="this.style.backgroundColor='#1ed760'; this.style.transform='scale(1.02)';" 
-          onmouseout="this.style.backgroundColor='#1DB954'; this.style.transform='scale(1)';"
-          onmousedown="this.style.transform='scale(0.98)';">
+        <button id="filterBtn" class="filter-btn" onclick="openModal()">
+            ➕ Add Filter
+        </button>
+
+        <button id="generateBtn" class="generate-btn" onclick="generatePlaylist()">
             generate playlist
         </button>
     </div>
 
-    <div id="timerDisplay" style="margin-top: 20px; color: #b3b3b3; font-weight: 500;"></div>
+    <div id="timerDisplay"></div>
 
-    <div id="loader" style="display:none; margin-top: 30px; font-size: 18px; color: #1DB954; font-weight: bold;">
-        🤖 loading...
+    <div id="loader" class="loader">
+        <div class="spinner"></div>
+        <div class="loader-text">AI is mixing your playlist...</div>
     </div>
 
-    <div id="results" style="
-        margin-top: 40px; 
-        width: 100%; 
-        max-width: 600px;
-        background-color: #181818;
-        border-radius: 8px;
-        padding: 20px;
-    "></div>
+    <div id="results" class="results-container"></div>
+
+    <div id="filterModal" class="modal">
+        <div class="modal-content">
+            <h2>Playlist Filters</h2>
+            
+            <label for="songCountInput">Number of Songs:</label>
+            <select id="songCountInput" class="modal-input">
+                <option value="10">10</option>
+                <option value="20" selected>20</option>
+                <option value="30">30</option>
+                <option value="40">40</option>
+                <option value="50">50</option>
+            </select>
+
+            <label>Genre:</label>
+            <input type="text" id="genreInput" class="modal-input" placeholder="e.g. Rock, Jazz, Pop">
+            
+            <label>Preferred Artist:</label>
+            <input type="text" id="artistInput" class="modal-input" placeholder="e.g. Queen, Drake">
+            
+            <label>Year Range:</label>
+            
+            <div class="range-values">
+                <span>From: <span id="startYearDisplay" class="value-label">1950</span></span>
+                <span>To: <span id="endYearDisplay" class="value-label">2026</span></span>
+            </div>
+
+            <div class="range-wrapper">
+                <div class="slider-track"></div>
+                <div class="slider-fill" id="sliderFill"></div>
+                
+                <input type="range" id="rangeStart" class="range-input" min="1950" max="2026" step="1" value="1950" oninput="updateDualSlider()">
+                <input type="range" id="rangeEnd" class="range-input" min="1950" max="2026" step="1" value="2026" oninput="updateDualSlider()">
+            </div>
+            
+            <button class="close-btn" onclick="closeModal()">Confirm & Close</button>
+        </div>
+    </div>
 
     <script src="generate.js"></script>
 </body>

@@ -1,0 +1,332 @@
+body {
+    background-color: #121212;
+    color: white;
+    font-family: 'Circular', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    margin: 0;
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    text-align: center;
+
+}
+
+.main-title {
+    font-size: 48px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.input-container {
+    width: 100%;
+    max-width: 500px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.results-container {
+    margin-top: 40px; 
+    width: 100%; 
+    max-width: 600px;
+    background-color: #181818;
+    border-radius: 8px;
+    padding: 20px;
+    text-align: left;
+    display: inline-block;
+    direction: ltr; 
+}
+
+/*songlists design*/
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+li {
+    padding: 5px 0;
+    border-bottom: 1px solid #eee;
+}
+
+/* inputs */
+input {
+    padding: 10px;
+    font-size: 16px;
+    width: 300px; 
+}
+
+.mood-input {
+    background-color: #242424;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    color: white;
+    padding: 14px 20px;
+    font-size: 16px;
+    outline: none;
+    transition: border 0.3s;
+    width: 100%; 
+    box-sizing: border-box; 
+}
+
+.mood-input:focus {
+    border: 1px solid #777;
+}
+
+/* buttons */
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #1DB954;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none !important; 
+}
+
+.filter-btn {
+    background-color: #535353;
+    font-size: 14px;
+    padding: 10px;
+    border-radius: 500px;
+}
+
+.filter-btn:hover {
+    background-color: #6a6a6a; 
+}
+
+.generate-btn {
+    background-color: #1DB954;
+    font-weight: 700;
+    padding: 14px;
+    border-radius: 500px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.generate-btn:hover {
+    background-color: #1ed760;
+    transform: scale(1.02);
+}
+
+.generate-btn:active {
+    transform: scale(0.98);
+}
+
+
+#timerDisplay {
+    margin-top: 20px; 
+    color: #b3b3b3; 
+    font-weight: 500;
+    font-size: 18px;
+}
+
+/* =========================================
+   LOADER ANIMATION STYLES
+   ========================================= */
+.loader {
+    display: none; /* מוסתר כברירת מחדל */
+    text-align: center; /* ממרכז את הספינר והטקסט */
+    margin-top: 30px;
+}
+
+/* העיגול המסתובב */
+.spinner {
+    display: inline-block;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(29, 185, 84, 0.3); /* רקע ירוק בהיר ושקוף */
+    border-top: 4px solid #1DB954; /* החלק המסתובב בצבע הירוק של ספוטיפיי */
+    border-radius: 50%; /* הופך את הריבוע לעיגול */
+    animation: spin 1s linear infinite; /* מפעיל את הסיבוב */
+    margin-bottom: 15px;
+}
+
+/* הטקסט מתחת לספינר */
+.loader-text {
+    color: #1DB954;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    animation: pulse 1.5s ease-in-out infinite; /* אפקט הבהוב עדין */
+}
+
+/* הגדרת אנימציית הסיבוב */
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* הגדרת אנימציית ההבהוב */
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 1; }
+    100% { opacity: 0.6; }
+}
+
+/* modal */
+.modal {
+    display: none; 
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    
+    /* --- הגדרות המירכוז החדשות (Flexbox) --- */
+    align-items: center;    /* ממרכז לגובה */
+    justify-content: center; /* ממרכז לרוחב */
+}
+
+.modal-content {
+    background-color: #242424;
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%;
+    max-width: 400px;
+    border-radius: 10px;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    
+    /* --- ביטול הגדרות מיקום ישנות --- */
+    position: relative; /* חוזר למצב רגיל */
+    margin: 0;          /* אין צורך במרווחים */
+    
+    /* בטיחות למסכים נמוכים */
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+.modal-content h2 {
+    text-align: center;
+    margin-top: 0;
+}
+
+.modal-input {
+    padding: 10px;
+    font-size: 16px;
+    border-radius: 4px;
+    border: 1px solid #777;
+    background-color: #121212;
+    color: white;
+    width: 100%; /* מוודא שהאינפוט תופס את כל רוחב המודל */
+    box-sizing: border-box;
+}
+
+.close-btn {
+    background-color: #1DB954;
+    color: white;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: bold;
+    border-radius: 50px;
+    margin-top: 10px;
+}
+
+.close-btn:hover {
+    background-color: #1ed760;
+}
+
+/* DUAL RANGE SLIDER STYLES*/
+.range-wrapper {
+    position: relative;
+    width: 100%;
+    height: 50px;
+    margin-top: 10px;
+    direction: ltr; 
+}
+
+.slider-track {
+    width: 100%;
+    height: 5px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #535353;
+    border-radius: 5px;
+    z-index: 0;
+}
+
+.slider-fill {
+    height: 5px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: #1DB954;
+    z-index: 1;
+}
+
+.range-input {
+    width: 100%;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0; 
+    background: none;
+    pointer-events: none;
+    
+    -webkit-appearance: none;
+    appearance: none;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    
+    z-index: 2;
+}
+
+.range-input::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    background-color: white;
+    border: 2px solid #1DB954;
+    border-radius: 50%;
+    cursor: pointer;
+    pointer-events: auto; 
+    transition: transform 0.2s;
+    box-shadow: 0 0 2px rgba(0,0,0,0.5);
+}
+
+.range-input::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.range-input::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    background-color: white;
+    border: 2px solid #1DB954;
+    border-radius: 50%;
+    cursor: pointer;
+    pointer-events: auto;
+    border: none;
+}
+
+.range-values {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    color: #b3b3b3;
+    margin-bottom: 5px;
+    direction: ltr;
+}
+
+.value-label {
+    color: #1DB954;
+    font-weight: bold;
+}

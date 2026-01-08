@@ -175,8 +175,8 @@ const playlistLimiter = rateLimit({
 });
 
 app.post('/generate',playlistLimiter, async (req, res) => {
-    const { mood } = req.body;
-    
+    const { mood, genre, artist, startYear, endYear, songCount = 20 } = req.body;    
+
     if (!mood) return res.status(400).json({ error: 'Mood is required' });
 
     try {
@@ -205,9 +205,16 @@ app.post('/generate',playlistLimiter, async (req, res) => {
                 responseSchema: responseSchema 
             } 
         });
-
-        const prompt = `Create a list of 10 songs based on this mood/activity: "${mood}".`;
-
+        prompt = `Create a list of ${songCount} songs based on this mood/activity: "${mood}".`;
+        if (genre) {
+            prompt += ` The songs should be in the "${genre}" genre.`;
+        }
+        if (artist) {
+            prompt += ` Prefer including songs by or similar to the artist "${artist}".`;
+        }
+        if (startYear && endYear) {
+            prompt += ` The songs must be released between the years ${startYear} and ${endYear}.`;
+        }
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
@@ -234,7 +241,7 @@ app.post('/save-playlist', async (req, res) => {
         return res.status(401).json({ error: 'User not logged in' });
     }
 
-    const { songs, mood } = req.body;
+    const { songs, mood, playlistName } = req.body;
     
     if (!songs || !Array.isArray(songs)) {//check validity of array
         return res.status(400).json({ error: 'Invalid songs data' });
@@ -277,7 +284,7 @@ app.post('/save-playlist', async (req, res) => {
         const userId = req.session.userId;        
         const playlistResponse = await axios.post(`https://api.spotify.com/v1/users/${userId}/playlists`, 
             {
-                name: `AI Mood: ${mood}`,
+                name: playlistName || `AI Mood: ${mood}`,
                 description: "Created by AI playlist generator 🤖",
                 public: false 
             },
