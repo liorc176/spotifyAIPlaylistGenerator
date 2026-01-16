@@ -52,6 +52,10 @@ app.get('/login', (req, res) => {//directing the client to login in Spotify
     res.redirect('https://accounts.spotify.com/authorize?' + params);
 });
 
+app.get('/playMusic', (req, res) => {
+    res.sendFile(path.join(clientPath, 'playMusic.html'));
+});
+
 app.get('/callback', async (req, res) => {
     const code = req.query.code || null;
     const state = req.query.state || null;
@@ -286,7 +290,7 @@ app.post('/save-playlist', async (req, res) => {
             {
                 name: playlistName || `AI Mood: ${mood}`,
                 description: "Created by AI playlist generator 🤖",
-                public: false 
+                public: true 
             },
             { headers: { 'Authorization': 'Bearer ' + req.session.access_token } }
         );
@@ -303,8 +307,7 @@ app.post('/save-playlist', async (req, res) => {
 
         console.log(`Playlist created! URL: ${playlistUrl}`);
         
-        res.json({ success: true, playlistUrl: playlistUrl });//send link to client
-
+        res.json({ success: true, playlistUrl: playlistUrl, playlistId: playlistId });
     } catch (error) {
         console.error('Error creating playlist:', error.response?.data || error.message);
         res.status(500).json({ error: 'Failed to create playlist on Spotify' });

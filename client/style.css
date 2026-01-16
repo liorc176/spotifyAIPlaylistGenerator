@@ -330,3 +330,110 @@ button:disabled {
     color: #1DB954;
     font-weight: bold;
 }
+.playlist-name-label {
+    display: block;
+    margin-top: 20px;
+    font-weight: bold;
+    font-size: 14px;
+    color: #b3b3b3;
+}
+
+/* שדה הקלט לשם הפלייליסט */
+.playlist-name-input {
+    width: 100%;
+    padding: 10px;
+    margin-top: 5px;
+    background-color: #242424;
+    border: 1px solid #777;
+    border-radius: 4px;
+    color: white;
+    font-size: 16px;
+    box-sizing: border-box; /* מונע חריגה מהרוחב */
+}
+
+/* כפתור שמירה לספוטיפיי */
+.save-spotify-btn {
+    margin-top: 30px;
+    background-color: #1DB954;
+    color: white;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 14px 32px;
+    border: none;
+    border-radius: 500px;
+    cursor: pointer;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+/* מצב ריחוף (Hover) לכפתור */
+.save-spotify-btn:hover {
+    background-color: #1ed760;
+    transform: scale(1.04);
+}
+
+/* מצב לחיצה (Active) לכפתור */
+.save-spotify-btn:active {
+    transform: scale(0.96);
+}
+
+/* קישור להצלחה (כשנוצר פלייליסט) */
+.success-link {
+    color: #1DB954;
+    font-weight: bold;
+    text-decoration: none;
+}
+
+.success-link:hover {
+    text-decoration: underline;
+}
+
+
+.player-container {
+    width: 100%;
+    max-width: 700px; 
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 25px;
+    animation: fadeIn 0.8s ease-in-out; 
+}
+
+.spotify-player {
+    width: 100%;
+    height: 500px; 
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.6); 
+}
+
+.secondary-btn {
+    background-color: transparent;
+    border: 1px solid #777;
+    color: #b3b3b3;
+    margin-top: 10px;
+}
+
+.secondary-btn:hover {
+    background-color: rgba(255,255,255,0.1);
+    border-color: white;
+    color: white;
+    transform: scale(1.02);
+}
+
+.fallback-link {
+    color: #1DB954;
+    text-decoration: none;
+    font-size: 14px;
+    margin-top: -10px;
+}
+
+.fallback-link:hover {
+    text-decoration: underline;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}

@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="he" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enjoy Your Music</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <h1 class="main-title">✨ Your Playlist is Ready! ✨</h1>
+    
+    <div class="player-container">
+        <div id="playerWrapper" style="width: 100%;"></div>
+
+        <a id="spotifyLink" href="#" target="_blank" class="save-spotify-btn" style="text-decoration: none;">
+            Open in Spotify App 🎧
+        </a>
+
+        <button onclick="window.location.href='/generatePlaylist'" class="save-spotify-btn secondary-btn">
+            Create Another Playlist ↺
+        </button>
+    </div>
+
+    <script>
+        const params = new URLSearchParams(window.location.search);
+        const playlistId = params.get('id');
+        const playlistUrl = params.get('url');
+
+        if (playlistId) {
+            const iframe = document.createElement('iframe');
+            // שימוש ב-Class החדש שיצרנו
+            iframe.className = "spotify-player";
+            iframe.src = `https://open.spotify.com/embed/playlist/${playlistId}?utm_source=generator`;
+            iframe.allowFullscreen = "";
+            iframe.allow = "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
+            iframe.loading = "lazy";
+            
+            document.getElementById('playerWrapper').appendChild(iframe);
+        }
+
+        if (playlistUrl) {
+            document.getElementById('spotifyLink').href = playlistUrl;
+        }
+    </script>
+</body>
+</html>

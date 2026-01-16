@@ -11,9 +11,7 @@ function updateDualSlider() {
     let endVal = parseInt(rangeEnd.value);
     const minGap = 10; 
 
-    // מניעת חפיפה בין הידיות
     if (endVal - startVal <= minGap) {
-        // בודקים איזה סליידר הזיז המשתמש
         if (event.target.id === 'rangeStart') {
             rangeStart.value = endVal - minGap;
             startVal = endVal - minGap;
@@ -23,11 +21,9 @@ function updateDualSlider() {
         }
     }
 
-    // עדכון הטקסט המוצג
     startDisplay.innerText = startVal;
     endDisplay.innerText = endVal;
 
-    // עדכון הפס הירוק (fill) בין הידיות
     const min = parseInt(rangeStart.min);
     const max = parseInt(rangeStart.max);
     
@@ -71,7 +67,27 @@ window.onclick = function(event) {
         closeModal();
     }
 }
+
+async function ensureAuthenticated() {
+    try {
+        const response = await fetch('/check-auth');
+        const data = await response.json();
+        
+        if (!data.authenticated) {
+            alert('Your session has expired. Please log in again.');
+            window.location.href = '/login';
+            return false;
+        }
+        return true; 
+    } catch (error) {
+        console.error("Auth check failed:", error);
+        return false;
+    }
+}
 async function generatePlaylist() {
+    const isAuthenticated = await ensureAuthenticated();
+    if (!isAuthenticated) return; 
+
     const moodInput = document.getElementById('moodInput');
     const mood = moodInput.value;
     const generateBtn = document.getElementById('generateBtn');
@@ -189,12 +205,9 @@ async function saveToSpotify() {
             saveBtn.innerText = 'saved successfully! ✅';
             
             const resultsDiv = document.getElementById('results');
-            const link = document.createElement('p');
-            link.style.marginTop = '15px';
             
-   
-            link.innerHTML = `🎉 your playlist is ready! <a href="${data.playlistUrl}" target="_blank" class="success-link">click here to open in Spotify</a>`;
-            resultsDiv.appendChild(link);
+            window.location.href = `/playMusic?id=${data.playlistId}&url=${encodeURIComponent(data.playlistUrl)}`;
+            
         } else {
             alert('error: ' + (data.error || 'could not save your playlist'));
             saveBtn.innerText = 'try again ❌';
