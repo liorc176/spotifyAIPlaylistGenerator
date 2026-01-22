@@ -59,7 +59,21 @@ function closeModal() {
         filterBtn.style.border = "none";
     }
 }
-
+function showAlert(message,onConfirm= null) {
+    document.getElementById('customAlertText').innerText = message;
+    document.getElementById('customAlertModal').style.display = 'flex';
+    const btn = document.getElementById('customAlertBtn');
+    
+    btn.onclick = function() {
+        closeCustomAlert(); 
+        if (onConfirm) {
+            onConfirm(); 
+        }
+    };
+}
+function closeCustomAlert() {
+    document.getElementById('customAlertModal').style.display = 'none';
+}
 
 window.onclick = function(event) {
     const modal = document.getElementById('filterModal');
@@ -74,9 +88,9 @@ async function ensureAuthenticated() {
         const data = await response.json();
         
         if (!data.authenticated) {
-            alert('Your session has expired. Please log in again.');
-            window.location.href = '/login';
-            return false;
+            showAlert('Your session has expired. Please log in again.', () => {
+                window.location.href = '/login';});   
+                return false;
         }
         return true; 
     } catch (error) {
@@ -99,8 +113,10 @@ async function generatePlaylist() {
     const songCount = document.getElementById('songCountInput').value;
     const startYear = document.getElementById('rangeStart').value;
     const endYear = document.getElementById('rangeEnd').value;
-    if (!mood) return alert('please enter mood');
-
+    if (!mood){ 
+        showAlert('please enter mood');
+        return
+    }
     loader.style.display = 'block';
     resultsDiv.innerHTML = '';
     timerDisplay.innerText = '';
@@ -142,7 +158,7 @@ async function generatePlaylist() {
         console.error('Error:', error);
         loader.style.display = 'none';
         generateBtn.disabled = false;
-        alert('error made while contact with server');
+        showAlert('error made while contact with server');
     }
 }
 
@@ -181,14 +197,19 @@ function renderSongs(songs) {
 }
 
 async function saveToSpotify() {
+        const isAuthenticated = await ensureAuthenticated();
+    if (!isAuthenticated) return; 
+
     const mood = document.getElementById('moodInput').value;
     const saveBtn = document.querySelector('#results button'); 
     const playlistNameInput = document.getElementById('playlistNameInput');
     
     const playlistName = playlistNameInput ? playlistNameInput.value : `AI Mood: ${mood}`;
     
-    if (!songsArr) return alert('cannot find those songs');
-
+    if (!songsArr){  
+        showAlert('cannot find those songs');
+        return
+    }
     saveBtn.disabled = true;
     saveBtn.innerText = 'saving... ⏳';
 
@@ -209,19 +230,18 @@ async function saveToSpotify() {
             window.location.href = `/playMusic?id=${data.playlistId}&url=${encodeURIComponent(data.playlistUrl)}`;
             
         } else {
-            alert('error: ' + (data.error || 'could not save your playlist'));
+            showAlert('error: ' + (data.error || 'could not save your playlist'));
             saveBtn.innerText = 'try again ❌';
             saveBtn.disabled = false;
         }
 
     } catch (error) {
         console.error('Save Error:', error);
-        alert('connection error');
+        showAlert('connection error');
         saveBtn.innerText = 'save in Spotify 💾';
         saveBtn.disabled = false;
     }
 }
-
 
 
 function startTimer(duration) {

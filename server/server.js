@@ -48,7 +48,6 @@ app.get('/login', (req, res) => {//directing the client to login in Spotify
         state: state,
         show_dialog: 'true'
     }).toString();
-
     res.redirect('https://accounts.spotify.com/authorize?' + params);
 });
 
@@ -140,7 +139,7 @@ app.get('/check-auth', async (req, res) => {
             const data = await refreshAccessToken(req.session.refresh_token);//using made helper function to refresh the token
 
             req.session.access_token = data.access_token;
-            if (data.refresh_token) //if got new refresh token instead
+            if (data.refresh_token) //if refresh token replaced
                 req.session.refresh_token = data.refresh_token;
             
             req.session.expires_at = Date.now() + (data.expires_in * 1000);
@@ -315,6 +314,4 @@ app.post('/save-playlist', async (req, res) => {
 });
 
 
-app.listen(port, () => {
-    console.log('Server listening at http://127.0.0.1:' +port);
-});
+app.listen(port,() => console.log("Server running on http://localhost:${port}"));
