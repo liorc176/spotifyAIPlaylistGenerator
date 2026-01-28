@@ -186,6 +186,8 @@ app.post('/generate',playlistLimiter, async (req, res) => {
         const responseSchema = {
             type: "object",
             properties: {
+                isValid: { type: "boolean" }, // האם הקלט תקין?
+                errorReason: { type: "string", nullable: true }, // למה לא תקין?
                 songs: {
                     type: "array",
                     items: {
@@ -194,11 +196,11 @@ app.post('/generate',playlistLimiter, async (req, res) => {
                             artist: { type: "string" },
                             track: { type: "string" }
                         },
-                        required: ["artist", "track"] // מבטיח שכל שיר יכיל את שניהם
+                        required: ["artist", "track"]
                     }
                 }
             },
-            required: ["songs"]
+            required: ["isValid"]
         };
 
         const model = genAI.getGenerativeModel({ 
@@ -208,22 +210,38 @@ app.post('/generate',playlistLimiter, async (req, res) => {
                 responseSchema: responseSchema 
             } 
         });
-        prompt = `Create a list of ${songCount} songs based on this mood/activity: "${mood}".`;
-        if (genre) {
-            prompt += ` The songs should be in the "${genre}" genre.`;
-        }
-        if (artist) {
-            prompt += ` Prefer including songs by or similar to the artist "${artist}".`;
-        }
-        if (startYear && endYear) {
-            prompt += ` The songs must be released between the years ${startYear} and ${endYear}.`;
-        }
+        let prompt = `
+            You are a music expert. Validate the following user inputs for a playlist:
+            - Mood/Activity: "${mood}"
+            - Genre: "${genre || 'Not specified'}"
+            - Artist: "${artist || 'Not specified'}"
+
+            Validation Rules:
+            1. If ANY of the provided fields (Mood, Genre, or Artist) contain gibberish (e.g., "asdf", "12345"), random characters, or topics completely unrelated to music/emotions, set "isValid" to false.
+            2. If the "Genre" is specified but is not a real music genre, set "isValid" to false.
+            3. If the "Artist" is specified but is clearly not a real musical artist or band, set "isValid" to false.
+            4. If "isValid" is false, provide a clear explanation in "errorReason" in Hebrew (e.g., "הז'אנר שהזנת אינו קיים").
+
+            If ALL inputs are valid:
+            - Set "isValid" to true.
+            - Generate a list of ${songCount} songs that match the mood "${mood}".
+            - ${genre ? `The songs must be from the "${genre}" genre.` : ''}
+            - ${artist ? `Include songs by or very similar to "${artist}".` : ''}
+            - ${startYear && endYear ? `Songs must be released between ${startYear} and ${endYear}.` : ''}
+            `;
         const result = await model.generateContent(prompt);
         const response = await result.response;
         const text = response.text();
         
         const parsedData = JSON.parse(text);
+        if (!parsedData.isValid) {
+        console.log(`Gemini rejected the input: ${parsedData.errorReason}`);
+        return res.status(400).json({ 
+            error:"input is not valid, please try again",
+            details: parsedData.errorReason
+        });
         res.json(parsedData);
+    }
 
     } catch (error) {
         console.error('Gemini Error:', error);

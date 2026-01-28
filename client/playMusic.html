@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Enjoy Your Music</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
@@ -20,6 +21,20 @@
         <button onclick="window.location.href='/generatePlaylist'" class="save-spotify-btn secondary-btn">
             Create Another Playlist ↺
         </button>
+        <div class="share-container">
+            <p>Liked the playlist? Share with your freinds</p>
+            <div class="share-buttons">
+                <a id="share-whatsapp" target="_blank" class="share-btn whatsapp">
+                    <i class="fab fa-whatsapp"></i> WhatsApp
+                </a>
+                <a id="share-facebook" target="_blank" class="share-btn facebook">
+                    <i class="fab fa-facebook-f"></i> Facebook
+                </a>
+                <a id="share-linkedin" target="_blank" class="share-btn linkedin">
+                    <i class="fab fa-linkedin-in"></i> LinkedIn
+                </a>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -29,7 +44,6 @@
 
         if (playlistId) {
             const iframe = document.createElement('iframe');
-            // שימוש ב-Class החדש שיצרנו
             iframe.className = "spotify-player";
             iframe.src = `https://open.spotify.com/embed/playlist/${playlistId}?utm_source=generator`;
             iframe.allowFullscreen = "";
@@ -41,7 +55,21 @@
 
         if (playlistUrl) {
             document.getElementById('spotifyLink').href = playlistUrl;
+            setupShareButtons(playlistUrl);
         }
+        function setupShareButtons(playlistUrl) {
+            const message ='I created a new playlist using SpotifyAIPlaylistGenerator. Come try it out:';
+            const encodedMsg = encodeURIComponent(message + " " + playlistUrl);
+            const encodedUrl = encodeURIComponent(playlistUrl);
+
+            const whatsappBtn = document.getElementById('share-whatsapp');
+            if (whatsappBtn) whatsappBtn.href = `https://wa.me/?text=${encodedMsg}`;
+
+            const facebookBtn = document.getElementById('share-facebook');
+            if (facebookBtn) facebookBtn.href = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+
+            const linkedinBtn = document.getElementById('share-linkedin');
+            if (linkedinBtn) linkedinBtn.href = `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`;}
     </script>
 </body>
 </html>

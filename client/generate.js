@@ -147,7 +147,7 @@ async function generatePlaylist() {
             return;
         }
 
-        if (!response.ok) {//check if any other problem
+        if (!response.ok|| data.error) {//check if any other problem
             throw new Error(data.error || 'Server error');
         }
         songsArr = data.songs;
@@ -158,7 +158,7 @@ async function generatePlaylist() {
         console.error('Error:', error);
         loader.style.display = 'none';
         generateBtn.disabled = false;
-        showAlert('error made while contact with server');
+        showAlert(error.message);
     }
 }
 
