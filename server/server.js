@@ -235,15 +235,15 @@ app.post('/generate',playlistLimiter, async (req, res) => {
         
         const parsedData = JSON.parse(text);
         if (!parsedData.isValid) {
-        console.log(`Gemini rejected the input: ${parsedData.errorReason}`);
-        return res.status(400).json({ 
-            error:"input is not valid, please try again",
-            details: parsedData.errorReason
-        });
+            console.log(`Gemini rejected the input: ${parsedData.errorReason}`);
+            return res.status(400).json({ 
+                error:"input is not valid, please try again",
+                details: parsedData.errorReason
+            });
+        }
         res.json(parsedData);
-    }
-
-    } catch (error) {
+    } 
+    catch (error) {
         console.error('Gemini Error:', error);
         if (error.status === 429 || (error.message && error.message.includes('429'))) {
             return res.status(429).json({ 
