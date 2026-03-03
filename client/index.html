@@ -3,11 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Spotify AI playlist generator | home page</title>
+    <link rel="stylesheet" href="style.css">
+
 </head>
 <body style="background-color: #121212; color: white; font-family: 'Circular', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; text-align: center;">
 
-    <h1 style="font-size: 70px; font-weight: 900; margin-bottom: 10px; letter-spacing: -2px;">welcome</h1>
+    <div class="top-nav">
+        <button id="profileBtn" class="nav-btn" style="display: none;" onclick="window.location.href='/profile'">
+            👤 <span id="profileName">Profile</span>
+        </button>
+    </div>
+    <h1 id="welcomeTitle" style="font-size: 70px; font-weight: 900; margin-bottom: 10px; letter-spacing: -2px;">welcome</h1>
     
     <p style="font-size: 24px; color: #b3b3b3; margin-bottom: 40px; font-weight: 500;">Generate your playlist with AI</p>
     

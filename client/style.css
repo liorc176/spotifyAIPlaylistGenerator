@@ -474,3 +474,33 @@ button:disabled {
 .whatsapp { background-color: #25D366; }
 .facebook { background-color: #1877F2; }
 .linkedin { background-color: #0077B5; }
+
+.top-nav {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    display: flex;
+    gap: 15px;
+    z-index: 100;
+}
+
+.nav-btn {
+    background-color: #242424;
+    color: white;
+    border: 1px solid #777;
+    padding: 8px 16px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: bold;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.nav-btn:hover {
+    background-color: #333;
+    border-color: white;
+    transform: scale(1.05);
+}

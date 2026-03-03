@@ -5,6 +5,7 @@ const axios = require('axios');
 const rateLimit = require('express-rate-limit');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { log } = require('console');
+const mysql = require('mysql2/promise');
 const app = express();
 const port = 3000;
 require('dotenv').config({path: path.join(__dirname, '..', '.env') });
@@ -12,7 +13,6 @@ const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI;
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const scope = 'playlist-modify-public playlist-modify-private user-read-private user-read-email';
-
 const clientPath=path.join(__dirname,'..', 'client')
 app.use(express.static(clientPath));
 app.use(express.json());
@@ -23,8 +23,27 @@ app.use(session({//creates a cookie to verify user auth
     saveUninitialized: false,
 }));
 
+const dbPool = mysql.createPool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
 
+async function testDbConnection() {
+    try {
+        const connection = await dbPool.getConnection();
+        console.log('✅ Successfully connected to local MySQL database!');
+        connection.release();
+    } catch (error) {
+        console.error('❌ Error connecting to MySQL database:', error.message);
+    }
+}
 
+testDbConnection();
 
 
 app.get('/', (req, res) => {//server will load index.html when starting
@@ -54,12 +73,17 @@ app.get('/login', (req, res) => {//directing the client to login in Spotify
 app.get('/playMusic', (req, res) => {
     res.sendFile(path.join(clientPath, 'playMusic.html'));
 });
-
+app.get('/profile', (req, res) => {
+    if (!req.session.access_token || !req.session.userId) {
+        return res.redirect('/');
+    }    
+    res.sendFile(path.join(clientPath, 'profilePage.html'));
+});
 app.get('/callback', async (req, res) => {
     const code = req.query.code || null;
     const state = req.query.state || null;
     const storedState = req.session.state || null;
-    if (state === null || state !== storedState) {//check if the state that came back from spotify is tha same as stored
+    if (state === null || state !== storedState) {//check if the state that came back from spotify is the same as stored
         return res.redirect('/#' + new URLSearchParams({ error: 'state_mismatch' }).toString());
     }
 
@@ -94,7 +118,16 @@ app.get('/callback', async (req, res) => {
                 req.session.userName = userResponse.data.display_name;
                 req.session.userId = userResponse.data.id; 
                 console.log(`Successfully logged in as: ${req.session.userName}`);
-
+                try {
+                    await dbPool.query(
+                        `INSERT INTO Users (user_id, display_name) VALUES (?, ?) 
+                        ON DUPLICATE KEY UPDATE display_name = ?`,
+                        [req.session.userId, req.session.userName, req.session.userName]
+                    );
+                    console.log(`User ${req.session.userName} saved/updated in DB.`);
+                } catch (dbErr) {
+                    console.error('Error saving user to DB:', dbErr.message);
+                }
             } 
             catch (userError) {
                 console.error('Error fetching user profile:', userError.message);
@@ -235,15 +268,16 @@ app.post('/generate',playlistLimiter, async (req, res) => {
         
         const parsedData = JSON.parse(text);
         if (!parsedData.isValid) {
-        console.log(`Gemini rejected the input: ${parsedData.errorReason}`);
-        return res.status(400).json({ 
-            error:"input is not valid, please try again",
-            details: parsedData.errorReason
-        });
+            console.log(`Gemini rejected the input: ${parsedData.errorReason}`);
+            return res.status(400).json({ 
+                error:"input is not valid, please try again",
+                details: parsedData.errorReason
+            });
+        }
         res.json(parsedData);
     }
 
-    } catch (error) {
+    catch (error) {
         console.error('Gemini Error:', error);
         if (error.status === 429 || (error.message && error.message.includes('429'))) {
             return res.status(429).json({ 
@@ -262,8 +296,7 @@ app.post('/save-playlist', async (req, res) => {
         return res.status(401).json({ error: 'User not logged in' });
     }
 
-    const { songs, mood, playlistName } = req.body;
-    
+    const { songs, mood, playlistName, genre, artist, songCount } = req.body;
     if (!songs || !Array.isArray(songs)) {//check validity of array
         return res.status(400).json({ error: 'Invalid songs data' });
     }
@@ -323,6 +356,27 @@ app.post('/save-playlist', async (req, res) => {
         );
 
         console.log(`Playlist created! URL: ${playlistUrl}`);
+
+        try {
+            await dbPool.query(
+                `INSERT INTO Generated_Playlists 
+                (user_id, spotify_playlist_id, playlist_name, spotify_url, prompt_mood, prompt_genre, prompt_artist, song_count) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+                [
+                    req.session.userId, 
+                    playlistId, 
+                    playlistName, 
+                    playlistUrl, 
+                    mood, 
+                    genre || null,
+                    artist || null, 
+                    songCount || songs.length 
+                ]
+            );
+            console.log(`Playlist stats saved to DB for user ${req.session.userName}`);
+        } catch (dbErr) {
+            console.error('Error saving playlist to DB:', dbErr.message);
+        }
         
         res.json({ success: true, playlistUrl: playlistUrl, playlistId: playlistId });
     } catch (error) {

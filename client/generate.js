@@ -38,6 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if(document.getElementById('rangeStart')) {
         updateDualSlider();
     }
+    ensureAuthenticated();
 });
 
 function openModal() {
@@ -92,6 +93,8 @@ async function ensureAuthenticated() {
                 window.location.href = '/login';});   
                 return false;
         }
+        const profileNameEl = document.getElementById('profileName');
+        if (profileNameEl) profileNameEl.innerText = data.user;
         return true; 
     } catch (error) {
         console.error("Auth check failed:", error);
@@ -203,8 +206,11 @@ async function saveToSpotify() {
     const mood = document.getElementById('moodInput').value;
     const saveBtn = document.querySelector('#results button'); 
     const playlistNameInput = document.getElementById('playlistNameInput');
-    
     const playlistName = playlistNameInput ? playlistNameInput.value : `AI Mood: ${mood}`;
+    
+    const genre = document.getElementById('genreInput').value;
+    const artist = document.getElementById('artistInput').value;
+    const songCount = document.getElementById('songCountInput').value;
     
     if (!songsArr){  
         showAlert('cannot find those songs');
@@ -217,7 +223,8 @@ async function saveToSpotify() {
         const response = await fetch('/save-playlist', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ songs: songsArr, mood: mood, playlistName: playlistName })
+            body: JSON.stringify({ songs: songsArr, mood: mood, playlistName: playlistName,
+                genre: genre, artist: artist,songCount: songCount})
         });
 
         const data = await response.json();
