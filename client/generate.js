@@ -200,7 +200,7 @@ function renderSongs(songs) {
 }
 
 async function saveToSpotify() {
-        const isAuthenticated = await ensureAuthenticated();
+    const isAuthenticated = await ensureAuthenticated();
     if (!isAuthenticated) return; 
 
     const mood = document.getElementById('moodInput').value;

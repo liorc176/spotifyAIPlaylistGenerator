@@ -3,9 +3,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spotify AI playlist generator | my prfile</title>
+    <title>My Profile - Spotify AI</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    
+<div class="top-nav">
+        <button class="nav-btn" onclick="window.location.href='/'">
+            🏠 Home
+        </button>
+        
+        <button class="nav-btn" onclick="window.location.href='/generatePlaylist'">
+            ✨ Create Playlist
+        </button>
+
+        <button class="nav-btn" style="background-color: #1DB954; color: black; border: none;" onclick="window.open('https://open.spotify.com', '_blank')">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" style="vertical-align: middle; margin-right: 4px;">
+                <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.6.18-1.2.72-1.38 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+            </svg>
+            Open Spotify
+        </button>
+    </div>
+    <h1 class="main-title" style="margin-top: 60px;">
+        <span id="profileNameDisplay">My</span> Profile 👤
+    </h1>
+
+    <div class="stats-container" id="statsContainer">
+        <div class="stat-card">
+            <div class="stat-title">Total Playlists</div>
+            <div class="stat-value" id="statTotal">-</div>
+            <div class="stat-subtitle">Generated so far</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Top Mood</div>
+            <div class="stat-value" id="statMood">-</div>
+            <div class="stat-subtitle" id="statMoodCount">0 times</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Top Genre</div>
+            <div class="stat-value" id="statGenre">-</div>
+            <div class="stat-subtitle" id="statGenreCount">0 times</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-title">Top Artist</div>
+            <div class="stat-value" id="statArtist">-</div>
+            <div class="stat-subtitle" id="statArtistCount">0 times</div>
+        </div>
+    </div>
+
+    <hr style="border-color: #333; width: 80%; margin-bottom: 30px;">
+    <h2>Your Playlist History</h2>
+
+    <div class="playlists-grid" id="playlistsGrid">
+        </div>
+
+    <button id="loadMoreBtn" class="load-more-btn" style="display: none;" onclick="loadPlaylists()">
+        Load More 👇
+    </button>
+    <div id="renameModal" class="modal">
+        <div class="modal-content">
+            <h2>Rename Playlist ✏️</h2>
+            <p style="color: #b3b3b3; font-size: 14px; text-align: center; margin-top: 0;">This will update the name here and on Spotify.</p>
+            
+            <input type="text" id="newPlaylistName" class="modal-input" placeholder="Enter new name...">
+            
+            <input type="hidden" id="editPlaylistId">
+            <input type="hidden" id="editDbId">
+
+            <button class="close-btn" onclick="submitRename()">Save Changes</button>
+            <button class="secondary-btn" onclick="closeRenameModal()" style="border: none; padding: 10px;">Cancel</button>
+        </div>
+    </div>
+
+    <div id="deleteModal" class="modal">
+        <div class="modal-content">
+            <h2>Delete Playlist 🗑️</h2>
+            <p style="color: #b3b3b3; font-size: 14px; text-align: center; margin-top: 0;">Are you sure? Choose how you want to delete this playlist:</p>
+            
+            <input type="hidden" id="deletePlaylistId">
+            <input type="hidden" id="deleteDbId">
+
+            <button class="danger-btn" onclick="submitDelete('both')">
+                Delete from Everywhere (Spotify & Profile)
+            </button>
+            
+            <button class="close-btn" onclick="submitDelete('db_only')" style="background-color: #535353;">
+                Remove from Profile Only
+            </button>
+            
+            <button class="secondary-btn" onclick="closeDeleteModal()" style="border: none; padding: 10px; margin-top: 5px;">Cancel</button>
+        </div>
+    </div>
+    <script src="profile.js"></script>
 </body>
 </html>

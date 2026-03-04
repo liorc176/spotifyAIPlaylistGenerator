@@ -384,6 +384,117 @@ app.post('/save-playlist', async (req, res) => {
         res.status(500).json({ error: 'Failed to create playlist on Spotify' });
     }
 });
+app.get('/api/user/stats', async (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
 
+    try {
+        const userId = req.session.userId;
+
+        const [totalRes] = await dbPool.query('SELECT COUNT(*) as count FROM Generated_Playlists WHERE user_id = ?', [userId]);
+
+        const [moodRes] = await dbPool.query('SELECT prompt_mood, COUNT(*) as count FROM Generated_Playlists WHERE user_id = ? AND prompt_mood IS NOT NULL GROUP BY prompt_mood ORDER BY count DESC LIMIT 1', [userId]);
+
+        const [genreRes] = await dbPool.query('SELECT prompt_genre, COUNT(*) as count FROM Generated_Playlists WHERE user_id = ? AND prompt_genre IS NOT NULL AND prompt_genre != "" GROUP BY prompt_genre ORDER BY count DESC LIMIT 1', [userId]);
+
+        const [artistRes] = await dbPool.query('SELECT prompt_artist, COUNT(*) as count FROM Generated_Playlists WHERE user_id = ? AND prompt_artist IS NOT NULL AND prompt_artist != "" GROUP BY prompt_artist ORDER BY count DESC LIMIT 1', [userId]);
+
+        res.json({
+            totalPlaylists: totalRes[0].count,
+            
+            topMood: moodRes.length > 0 ? moodRes[0].prompt_mood : '-',
+            topMoodCount: moodRes.length > 0 ? moodRes[0].count : 0,
+            topGenre: genreRes.length > 0 ? genreRes[0].prompt_genre : '-',
+            topGenreCount: genreRes.length > 0 ? genreRes[0].count : 0,             
+            topArtist: artistRes.length > 0 ? artistRes[0].prompt_artist : '-',
+            topArtistCount: artistRes.length > 0 ? artistRes[0].count : 0
+        });
+    } catch (error) {
+        console.error('Error fetching stats:', error.message);
+        res.status(500).json({ error: 'Failed to fetch stats' });
+    }
+});
+
+app.get('/api/user/playlists', async (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
+    try {
+        const userId = req.session.userId;
+        const limit = parseInt(req.query.limit) || 4; 
+        const offset = parseInt(req.query.offset) || 0;
+
+        const [playlists] = await dbPool.query(
+            `SELECT id,spotify_playlist_id, playlist_name, spotify_url 
+             FROM Generated_Playlists 
+             WHERE user_id = ? 
+             ORDER BY created_at DESC 
+             LIMIT ${limit} OFFSET ${offset}`,
+            [userId]
+        );
+
+        const [countRes] = await dbPool.query('SELECT COUNT(*) as total FROM Generated_Playlists WHERE user_id = ?', [userId]);
+        const totalPlaylists = countRes[0].total;
+        
+        const hasMore = (offset + playlists.length) < totalPlaylists;
+
+        res.json({
+            playlists: playlists,
+            hasMore: hasMore
+        });
+    } catch (error) {
+        console.error('Error fetching playlists:', error.message);
+        res.status(500).json({ error: 'Failed to fetch playlists' });
+    }
+});
+
+// ראוט לשינוי שם פלייליסט
+app.put('/api/user/playlist/:id', async (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const dbId = req.params.id;
+    const { spotifyPlaylistId, newName } = req.body;
+
+    try {
+        // 1. עדכון השם בספוטיפיי
+        await axios.put(`https://api.spotify.com/v1/playlists/${spotifyPlaylistId}`, 
+            { name: newName },
+            { headers: { 'Authorization': 'Bearer ' + req.session.access_token } }
+        );
+
+        // 2. עדכון השם במסד הנתונים שלנו
+        await dbPool.query(
+            'UPDATE Generated_Playlists SET playlist_name = ? WHERE id = ? AND user_id = ?',
+            [newName, dbId, req.session.userId]
+        );
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error renaming playlist:', error.response?.data || error.message);
+        res.status(500).json({ error: 'Failed to rename playlist' });
+    }
+});
+
+app.delete('/api/user/playlist/:id', async (req, res) => {
+    if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
+
+    const dbId = req.params.id;
+    const { spotifyPlaylistId, deleteType } = req.body; 
+
+    try {
+        if (deleteType === 'both') {
+            await axios.delete(`https://api.spotify.com/v1/playlists/${spotifyPlaylistId}/followers`, {
+                headers: { 'Authorization': 'Bearer ' + req.session.access_token }
+            });
+        }
+
+        await dbPool.query(
+            'DELETE FROM Generated_Playlists WHERE id = ? AND user_id = ?',
+            [dbId, req.session.userId]
+        );
+
+        res.json({ success: true });
+    } catch (error) {
+        console.error('Error deleting playlist:', error.response?.data || error.message);
+        res.status(500).json({ error: 'Failed to delete playlist' });
+    }
+});
 
 app.listen(port,() => console.log("Server running on http://localhost:${port}"));
