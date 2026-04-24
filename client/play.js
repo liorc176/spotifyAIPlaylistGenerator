@@ -27,10 +27,18 @@
             document.getElementById('playerWrapper').appendChild(iframe);
         }
 
-        if (playlistUrl) {
+        if (playlistUrl && playlistUrl.startsWith('https://open.spotify.com/')) {
             document.getElementById('spotifyLink').href = playlistUrl;
             setupShareButtons(playlistUrl);
+        } else if (playlistUrl) {
+            document.getElementById('spotifyLink').style.display = 'none';
+            const shareContainer = document.querySelector('.share-container');
+            if (shareContainer) {
+                shareContainer.style.display = 'none';
+            }           
+            console.error('Blocked an invalid or malicious Spotify URL');
         }
+        
         function setupShareButtons(playlistUrl) {
             const message ='I created a new playlist using SpotifyAIPlaylistGenerator. Come try it out:';
             const encodedMsg = encodeURIComponent(message + " " + playlistUrl);

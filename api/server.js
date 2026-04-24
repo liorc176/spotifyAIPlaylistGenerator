@@ -445,7 +445,6 @@ app.get('/api/user/playlists', async (req, res) => {
     }
 });
 
-// ראוט לשינוי שם פלייליסט
 app.put('/api/user/playlist/:id', async (req, res) => {
     if (!req.session.userId) return res.status(401).json({ error: 'Unauthorized' });
 
