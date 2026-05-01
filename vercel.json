@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "rewrites": [
+    { "source": "/login", "destination": "/api/server" },
+    { "source": "/callback", "destination": "/api/server" },
+    { "source": "/check-auth", "destination": "/api/server" },
+    { "source": "/generate", "destination": "/api/server" },
+    { "source": "/save-playlist", "destination": "/api/server" },
+    { "source": "/generatePlaylist", "destination": "/client/generatePlaylist.html" },
+    { "source": "/playMusic", "destination": "/client/playMusic.html" },
+    { "source": "/", "destination": "/client/index.html" },
+    { "source": "/(.*)", "destination": "/client/$1" }
+  ]
+}

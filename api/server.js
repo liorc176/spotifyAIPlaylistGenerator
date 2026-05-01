@@ -6,6 +6,7 @@ const rateLimit = require('express-rate-limit');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { log } = require('console');
 const mysql = require('mysql2/promise');
+const MongoStore = require('connect-mongo');
 const app = express();
 const port = 3000;
 require('dotenv').config({path: path.join(__dirname, '..', '.env') });
@@ -13,14 +14,21 @@ const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI;
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const scope = 'playlist-modify-public playlist-modify-private user-read-private user-read-email';
-const clientPath=path.join(__dirname,'..', 'client')
-app.use(express.static(clientPath));
+
 app.use(express.json());
 console.log('SESSION_SECRET loaded:', process.env.SESSION_SECRET);
-app.use(session({//creates a cookie to verify user auth
+
+app.use(session({
     secret: process.env.SESSION_SECRET, 
     resave: false,
     saveUninitialized: false,
+    store: MongoStore.create({
+        mongoUrl: process.env.MONGODB_URI,
+        collectionName: 'sessions'
+    }),
+    cookie: {
+        maxAge: 1000 * 60 * 60 * 24 
+    }
 }));
 
 const dbPool = mysql.createPool({
@@ -45,17 +53,6 @@ async function testDbConnection() {
 
 testDbConnection();
 
-
-app.get('/', (req, res) => {//server will load index.html when starting
-    
-    res.sendFile(path.join(clientPath, 'index.html'));
-});
-
-app.get('/generatePlaylist', (req, res) => {
-    
-    res.sendFile(path.join(clientPath, 'generatePlaylist.html'));
-});
-
 app.get('/login', (req, res) => {//directing the client to login in Spotify
     const state = generateRandomString(16); 
     req.session.state = state; 
@@ -70,9 +67,7 @@ app.get('/login', (req, res) => {//directing the client to login in Spotify
     res.redirect('https://accounts.spotify.com/authorize?' + params);
 });
 
-app.get('/playMusic', (req, res) => {
-    res.sendFile(path.join(clientPath, 'playMusic.html'));
-});
+
 app.get('/profile', (req, res) => {
     if (!req.session.access_token || !req.session.userId) {
         return res.redirect('/');
@@ -310,7 +305,7 @@ app.post('/save-playlist', async (req, res) => {
             try {
                 const query = `track:${song.track} artist:${song.artist}`;//search by song and artist
                 
-                const searchResponse = await axios.get('http://api.spotify.com/v1/search', {
+                const searchResponse = await axios.get('https://api.spotify.com/v1/search', {
                     headers: { 'Authorization': 'Bearer ' + req.session.access_token },
                     params: {
                         q: query,
@@ -496,4 +491,4 @@ app.delete('/api/user/playlist/:id', async (req, res) => {
     }
 });
 
-app.listen(port,() => console.log("Server running on http://localhost:${port}"));
+module.exports = app;
