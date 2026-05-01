@@ -76,12 +76,6 @@ app.get('/login', (req, res) => {//directing the client to login in Spotify
 });
 
 
-app.get('/profile', (req, res) => {
-    if (!req.session.access_token || !req.session.userId) {
-        return res.redirect('/');
-    }    
-    res.sendFile(path.join(clientPath, 'profilePage.html'));
-});
 app.get('/callback', async (req, res) => {
     const code = req.query.code || null;
     const state = req.query.state || null;

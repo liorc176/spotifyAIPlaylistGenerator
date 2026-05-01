@@ -7,8 +7,10 @@
     { "source": "/save-playlist", "destination": "/api/server.js" },
     { "source": "/api/(.*)", "destination": "/api/server.js" },
     
+    
     { "source": "/generatePlaylist", "destination": "/client/generatePlaylist.html" },
     { "source": "/playMusic", "destination": "/client/playMusic.html" },
+    { "source": "/profile", "destination": "/api/profilePage" },
     { "source": "/", "destination": "/client/index.html" },
     { "source": "/(.*)", "destination": "/client/$1" }
   ]
