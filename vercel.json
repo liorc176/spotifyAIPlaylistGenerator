@@ -10,7 +10,7 @@
     
     { "source": "/generatePlaylist", "destination": "/client/generatePlaylist.html" },
     { "source": "/playMusic", "destination": "/client/playMusic.html" },
-    { "source": "/profile", "destination": "/api/profilePage" },
+    { "source": "/profile", "destination": "/client/profilePage" },
     { "source": "/", "destination": "/client/index.html" },
     { "source": "/(.*)", "destination": "/client/$1" }
   ]
