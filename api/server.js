@@ -8,7 +8,7 @@ const { log } = require('console');
 const mysql = require('mysql2/promise');
 const MySQLStore = require('express-mysql-session')(session);
 const app = express();
-require('dotenv').config({path: path.join(__dirname, '..', '.env') });
+require('dotenv').config();
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI;
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
