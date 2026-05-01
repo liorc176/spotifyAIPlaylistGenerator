@@ -117,7 +117,7 @@ app.get('/callback', async (req, res) => {
                 console.log(`Successfully logged in as: ${req.session.userName}`);
                 try {
                     await dbPool.query(
-                        `INSERT INTO Users (user_id, display_name) VALUES (?, ?) 
+                        `INSERT INTO users (user_id, display_name) VALUES (?, ?) 
                         ON DUPLICATE KEY UPDATE display_name = ?`,
                         [req.session.userId, req.session.userName, req.session.userName]
                     );
@@ -356,7 +356,7 @@ app.post('/save-playlist', async (req, res) => {
 
         try {
             await dbPool.query(
-                `INSERT INTO Generated_Playlists 
+                `INSERT INTO generated_Playlists 
                 (user_id, spotify_playlist_id, playlist_name, spotify_url, prompt_mood, prompt_genre, prompt_artist, song_count) 
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
                 [
@@ -387,13 +387,13 @@ app.get('/api/user/stats', async (req, res) => {
     try {
         const userId = req.session.userId;
 
-        const [totalRes] = await dbPool.query('SELECT COUNT(*) as count FROM Generated_Playlists WHERE user_id = ?', [userId]);
+        const [totalRes] = await dbPool.query('SELECT COUNT(*) as count FROM generated_Playlists WHERE user_id = ?', [userId]);
 
-        const [moodRes] = await dbPool.query('SELECT prompt_mood, COUNT(*) as count FROM Generated_Playlists WHERE user_id = ? AND prompt_mood IS NOT NULL GROUP BY prompt_mood ORDER BY count DESC LIMIT 1', [userId]);
+        const [moodRes] = await dbPool.query('SELECT prompt_mood, COUNT(*) as count FROM generated_Playlists WHERE user_id = ? AND prompt_mood IS NOT NULL GROUP BY prompt_mood ORDER BY count DESC LIMIT 1', [userId]);
 
-        const [genreRes] = await dbPool.query('SELECT prompt_genre, COUNT(*) as count FROM Generated_Playlists WHERE user_id = ? AND prompt_genre IS NOT NULL AND prompt_genre != "" GROUP BY prompt_genre ORDER BY count DESC LIMIT 1', [userId]);
+        const [genreRes] = await dbPool.query('SELECT prompt_genre, COUNT(*) as count FROM generated_Playlists WHERE user_id = ? AND prompt_genre IS NOT NULL AND prompt_genre != "" GROUP BY prompt_genre ORDER BY count DESC LIMIT 1', [userId]);
 
-        const [artistRes] = await dbPool.query('SELECT prompt_artist, COUNT(*) as count FROM Generated_Playlists WHERE user_id = ? AND prompt_artist IS NOT NULL AND prompt_artist != "" GROUP BY prompt_artist ORDER BY count DESC LIMIT 1', [userId]);
+        const [artistRes] = await dbPool.query('SELECT prompt_artist, COUNT(*) as count FROM generated_Playlists WHERE user_id = ? AND prompt_artist IS NOT NULL AND prompt_artist != "" GROUP BY prompt_artist ORDER BY count DESC LIMIT 1', [userId]);
 
         res.json({
             totalPlaylists: totalRes[0].count,
@@ -420,7 +420,7 @@ app.get('/api/user/playlists', async (req, res) => {
 
         const [playlists] = await dbPool.query(
             `SELECT id,spotify_playlist_id, playlist_name, spotify_url 
-             FROM Generated_Playlists 
+             FROM generated_Playlists 
              WHERE user_id = ? 
              ORDER BY created_at DESC 
              LIMIT ${limit} OFFSET ${offset}`,
@@ -449,15 +449,13 @@ app.put('/api/user/playlist/:id', async (req, res) => {
     const { spotifyPlaylistId, newName } = req.body;
 
     try {
-        // 1. עדכון השם בספוטיפיי
         await axios.put(`https://api.spotify.com/v1/playlists/${spotifyPlaylistId}`, 
             { name: newName },
             { headers: { 'Authorization': 'Bearer ' + req.session.access_token } }
         );
 
-        // 2. עדכון השם במסד הנתונים שלנו
         await dbPool.query(
-            'UPDATE Generated_Playlists SET playlist_name = ? WHERE id = ? AND user_id = ?',
+            'UPDATE generated_Playlists SET playlist_name = ? WHERE id = ? AND user_id = ?',
             [newName, dbId, req.session.userId]
         );
 
@@ -482,7 +480,7 @@ app.delete('/api/user/playlist/:id', async (req, res) => {
         }
 
         await dbPool.query(
-            'DELETE FROM Generated_Playlists WHERE id = ? AND user_id = ?',
+            'DELETE FROM generated_Playlists WHERE id = ? AND user_id = ?',
             [dbId, req.session.userId]
         );
 
