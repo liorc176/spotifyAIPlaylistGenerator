@@ -6,9 +6,8 @@ const rateLimit = require('express-rate-limit');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { log } = require('console');
 const mysql = require('mysql2/promise');
-const MongoStore = require('connect-mongo');
+const MySQLStore = require('express-mysql-session')(session);
 const app = express();
-const port = 3000;
 require('dotenv').config({path: path.join(__dirname, '..', '.env') });
 const SPOTIFY_CLIENT_ID = process.env.SPOTIFY_CLIENT_ID;
 const SPOTIFY_REDIRECT_URI = process.env.SPOTIFY_REDIRECT_URI;
@@ -18,33 +17,42 @@ const scope = 'playlist-modify-public playlist-modify-private user-read-private 
 app.use(express.json());
 console.log('SESSION_SECRET loaded:', process.env.SESSION_SECRET);
 
-app.use(session({
-    secret: process.env.SESSION_SECRET, 
-    resave: false,
-    saveUninitialized: false,
-    store: MongoStore.create({
-        mongoUrl: process.env.MONGODB_URI,
-        collectionName: 'sessions'
-    }),
-    cookie: {
-        maxAge: 1000 * 60 * 60 * 24 
-    }
-}));
+
 
 const dbPool = mysql.createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
+    port: process.env.DB_PORT || 4000, 
+    ssl: {
+        minVersion: 'TLSv1.2',
+        rejectUnauthorized: true 
+    },
     waitForConnections: true,
     connectionLimit: 10,
     queueLimit: 0
 });
 
+const sessionStore = new MySQLStore({
+    clearExpired: true,
+    checkExpirationInterval: 900000,
+    expiration: 86400000
+}, dbPool);
+
+app.use(session({
+    key: 'spotify_ai_session',
+    secret: process.env.SESSION_SECRET,
+    store: sessionStore, 
+    resave: false,
+    saveUninitialized: false,
+    cookie: { maxAge: 1000 * 60 * 60 * 24 }
+}));
+
 async function testDbConnection() {
     try {
         const connection = await dbPool.getConnection();
-        console.log('✅ Successfully connected to local MySQL database!');
+        console.log('✅ Successfully connected to TIDB MySQL database!');
         connection.release();
     } catch (error) {
         console.error('❌ Error connecting to MySQL database:', error.message);

@@ -1,11 +1,12 @@
 {
-  "version": 2,
   "rewrites": [
-    { "source": "/login", "destination": "/api/server" },
-    { "source": "/callback", "destination": "/api/server" },
-    { "source": "/check-auth", "destination": "/api/server" },
-    { "source": "/generate", "destination": "/api/server" },
-    { "source": "/save-playlist", "destination": "/api/server" },
+    { "source": "/login", "destination": "/api/server.js" },
+    { "source": "/callback", "destination": "/api/server.js" },
+    { "source": "/check-auth", "destination": "/api/server.js" },
+    { "source": "/generate", "destination": "/api/server.js" },
+    { "source": "/save-playlist", "destination": "/api/server.js" },
+    { "source": "/api/(.*)", "destination": "/api/server.js" },
+    
     { "source": "/generatePlaylist", "destination": "/client/generatePlaylist.html" },
     { "source": "/playMusic", "destination": "/client/playMusic.html" },
     { "source": "/", "destination": "/client/index.html" },
